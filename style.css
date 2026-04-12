@@ -18,11 +18,16 @@
   --sidebar-width: 240px;
 }
 
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 body {
   font-family: "Roboto", "Noto Sans JP", "Hiragino Sans", sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
-  overflow-x: hidden;
+  position: relative;
 }
 
 /* Header */
@@ -140,6 +145,7 @@ body {
 .main-layout {
   display: flex;
   margin-top: var(--header-height);
+  overflow-x: hidden;
 }
 
 /* Sidebar */
