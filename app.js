@@ -180,18 +180,22 @@ function renderHome() {
     section.innerHTML = `
       <div class="section-header">
         <h2 class="section-title">${sec.icon} ${sec.title}（${videos.length}本）</h2>
-        <div class="section-header-right">
-          <button class="scroll-nav scroll-nav-left hidden" aria-label="左へ">◀</button>
-          <button class="scroll-nav scroll-nav-right" aria-label="右へ">▶</button>
-          <a class="section-more" data-category="${sec.category}">すべて見る →</a>
-        </div>
+        <a class="section-more" data-category="${sec.category}">すべて見る →</a>
       </div>
-      <div class="section-scroll"></div>
+      <div class="carousel-wrap">
+        <button class="carousel-arrow carousel-arrow-left hidden" aria-label="左へ">
+          <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
+        <div class="section-scroll"></div>
+        <button class="carousel-arrow carousel-arrow-right" aria-label="右へ">
+          <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+        </button>
+      </div>
     `;
 
     const scroll = section.querySelector('.section-scroll');
-    const btnLeft = section.querySelector('.scroll-nav-left');
-    const btnRight = section.querySelector('.scroll-nav-right');
+    const btnLeft = section.querySelector('.carousel-arrow-left');
+    const btnRight = section.querySelector('.carousel-arrow-right');
     const scrollAmount = 296 * 3;
 
     btnLeft.addEventListener('click', () => scroll.scrollBy({ left: -scrollAmount, behavior: 'smooth' }));
