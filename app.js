@@ -577,9 +577,180 @@ function enableDragScroll(el) {
   }
 }
 
+// ==================== Menu Bot ====================
+
+let botAnswers = {};
+
+function toggleBot() {
+  const body = document.getElementById('botBody');
+  const toggle = document.getElementById('botToggle');
+  if (body.style.display === 'none') {
+    body.style.display = 'block';
+    toggle.classList.add('open');
+  } else {
+    body.style.display = 'none';
+    toggle.classList.remove('open');
+  }
+}
+
+function botAnswer(step, value) {
+  botAnswers[step] = value;
+
+  // Hide current step, show next
+  const current = document.querySelector(`.bot-step[data-step="${step}"]`);
+  current.classList.remove('active');
+
+  if (step < 4) {
+    const next = document.querySelector(`.bot-step[data-step="${step + 1}"]`);
+    next.classList.add('active');
+  } else {
+    generateMenu();
+  }
+}
+
+function botReset() {
+  botAnswers = {};
+  document.getElementById('botResult').style.display = 'none';
+  document.getElementById('botSteps').style.display = 'block';
+  document.querySelectorAll('.bot-step').forEach((s, i) => {
+    s.classList.toggle('active', i === 0);
+  });
+}
+
+function generateMenu() {
+  const purpose = botAnswers[1];
+  const time = botAnswers[2];
+  const bui = botAnswers[3];
+  const level = botAnswers[4];
+
+  document.getElementById('botSteps').style.display = 'none';
+  const result = document.getElementById('botResult');
+  result.style.display = 'block';
+
+  // Build menu structure based on time
+  let menuStructure;
+  if (time <= 15) {
+    menuStructure = [
+      { cat: 'ラジオ体操', label: 'ウォームアップ', maxDur: 4 },
+      { cat: '筋トレ', label: 'メイン', maxDur: 7 },
+      { cat: 'ストレッチ', label: 'クールダウン', maxDur: 5 },
+    ];
+  } else if (time <= 30) {
+    menuStructure = [
+      { cat: 'ラジオ体操', label: 'ウォームアップ', maxDur: 4 },
+      { cat: '筋トレ', label: 'メイン①', maxDur: 10 },
+      { cat: '有酸素', label: 'メイン②', maxDur: 8 },
+      { cat: 'ストレッチ', label: 'クールダウン', maxDur: 8 },
+    ];
+  } else {
+    menuStructure = [
+      { cat: 'ラジオ体操', label: 'ウォームアップ', maxDur: 4 },
+      { cat: '筋トレ', label: 'メイン①', maxDur: 12 },
+      { cat: '有酸素', label: 'メイン②', maxDur: 10 },
+      { cat: '筋トレ', label: 'メイン③', maxDur: 10 },
+      { cat: 'ストレッチ', label: 'クールダウン', maxDur: 10 },
+    ];
+  }
+
+  // Adjust based on purpose
+  if (purpose === 'ダイエット') {
+    menuStructure = menuStructure.map(m => {
+      if (m.cat === '筋トレ' && m.label === 'メイン②') return { ...m, cat: '有酸素' };
+      if (m.cat === '有酸素') return { ...m, cat: Math.random() > 0.5 ? 'ボクササイズ' : '有酸素' };
+      return m;
+    });
+  } else if (purpose === 'リフレッシュ') {
+    menuStructure = menuStructure.map(m => {
+      if (m.cat === '筋トレ') return { ...m, cat: Math.random() > 0.5 ? 'ヨガ' : 'ストレッチ' };
+      if (m.cat === '有酸素') return { ...m, cat: 'ヨガ', label: 'ヨガ' };
+      return m;
+    });
+  }
+
+  // Pick videos for each slot
+  const menuList = document.getElementById('botMenuList');
+  menuList.innerHTML = '';
+  let totalTime = 0;
+
+  menuStructure.forEach((slot, i) => {
+    // Find matching videos
+    let candidates = allVideos.filter(v =>
+      v.normalizedCategories.some(c => c.category === slot.cat)
+    );
+
+    // Filter by body part if specified
+    if (bui !== 'おまかせ' && slot.cat === '筋トレ') {
+      const buiFiltered = candidates.filter(v => {
+        const parts = v.buiParts.join(' ');
+        if (bui === '全身') return parts.includes('全身') || v.buiParts.length === 0;
+        if (bui === '上半身') return ['胸', '背中', '腕', '肩'].some(b => parts.includes(b));
+        if (bui === '下半身') return ['足', 'お尻', '下半身'].some(b => parts.includes(b));
+        if (bui === '体幹') return ['体幹', '腹筋', 'お腹'].some(b => parts.includes(b));
+        return true;
+      });
+      if (buiFiltered.length > 0) candidates = buiFiltered;
+    }
+
+    // Filter by duration
+    if (slot.maxDur) {
+      const durFiltered = candidates.filter(v =>
+        v.duration && v.duration <= slot.maxDur
+      );
+      if (durFiltered.length > 0) candidates = durFiltered;
+    }
+
+    // Filter by level (shorter for beginners)
+    if (level === '初心者') {
+      const easyFiltered = candidates.filter(v => !v.duration || v.duration <= 8);
+      if (easyFiltered.length > 0) candidates = easyFiltered;
+    } else if (level === '上級者') {
+      const hardFiltered = candidates.filter(v => v.duration && v.duration >= 5);
+      if (hardFiltered.length > 0) candidates = hardFiltered;
+    }
+
+    if (candidates.length === 0) return;
+
+    // Random pick
+    const video = candidates[Math.floor(Math.random() * candidates.length)];
+    const dur = video.duration ? Math.round(video.duration) : '?';
+    totalTime += video.duration || 0;
+    const title = escapeHtml(video.displayTitle || '動画');
+
+    const item = document.createElement('div');
+    item.className = 'bot-menu-item';
+    item.innerHTML = `
+      <a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank" rel="noopener">
+        <span class="bot-menu-step">${i + 1}</span>
+        <img src="${getThumbnail(video.videoId)}" alt="" class="bot-menu-thumb"
+             onerror="this.style.background='#303030'">
+        <div class="bot-menu-info">
+          <div class="bot-menu-cat">${slot.label}（${escapeHtml(slot.cat)}）</div>
+          <div class="bot-menu-title">${title}</div>
+          <div class="bot-menu-dur">${dur}分</div>
+        </div>
+      </a>
+    `;
+    menuList.appendChild(item);
+  });
+
+  // Title
+  const titles = {
+    'ダイエット': '🔥 脂肪燃焼メニュー',
+    '筋力アップ': '💪 筋力アップメニュー',
+    'リフレッシュ': '😌 リフレッシュメニュー',
+    '体力づくり': '🏃 体力づくりメニュー',
+  };
+  document.getElementById('botResultTitle').textContent = titles[purpose] || '今日のメニュー';
+  document.getElementById('botResultDesc').textContent =
+    `${bui}・${level}向け・合計約${Math.round(totalTime)}分`;
+}
+
 // Expose functions for inline onclick
 window.filterCategory = filterCategory;
 window.filterBui = filterBui;
 window.filterPurpose = filterPurpose;
 window.filterTime = filterTime;
 window.resetFilters = resetFilters;
+window.toggleBot = toggleBot;
+window.botAnswer = botAnswer;
+window.botReset = botReset;

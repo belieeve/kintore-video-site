@@ -152,6 +152,69 @@
         </div>
       </section>
 
+      <!-- Menu Bot -->
+      <section class="menu-bot" id="menuBot">
+        <div class="bot-header" onclick="toggleBot()">
+          <span class="bot-icon">🤖</span>
+          <span class="bot-title">今日のメニューを作る</span>
+          <span class="bot-toggle" id="botToggle">▼</span>
+        </div>
+        <div class="bot-body" id="botBody" style="display:none;">
+          <div class="bot-steps" id="botSteps">
+            <!-- Step 1 -->
+            <div class="bot-step active" data-step="1">
+              <p class="bot-question">今日の目的は？</p>
+              <div class="bot-options">
+                <button class="bot-opt" onclick="botAnswer(1, 'ダイエット')">🔥 ダイエット</button>
+                <button class="bot-opt" onclick="botAnswer(1, '筋力アップ')">💪 筋力アップ</button>
+                <button class="bot-opt" onclick="botAnswer(1, 'リフレッシュ')">😌 リフレッシュ</button>
+                <button class="bot-opt" onclick="botAnswer(1, '体力づくり')">🏃 体力づくり</button>
+              </div>
+            </div>
+            <!-- Step 2 -->
+            <div class="bot-step" data-step="2">
+              <p class="bot-question">どのくらい時間がある？</p>
+              <div class="bot-options">
+                <button class="bot-opt" onclick="botAnswer(2, 15)">⚡ 15分</button>
+                <button class="bot-opt" onclick="botAnswer(2, 30)">⏱️ 30分</button>
+                <button class="bot-opt" onclick="botAnswer(2, 45)">💪 45分</button>
+              </div>
+            </div>
+            <!-- Step 3 -->
+            <div class="bot-step" data-step="3">
+              <p class="bot-question">鍛えたい部位は？</p>
+              <div class="bot-options">
+                <button class="bot-opt" onclick="botAnswer(3, '全身')">🏋️ 全身</button>
+                <button class="bot-opt" onclick="botAnswer(3, '上半身')">💪 上半身</button>
+                <button class="bot-opt" onclick="botAnswer(3, '下半身')">🦵 下半身</button>
+                <button class="bot-opt" onclick="botAnswer(3, '体幹')">🧘 体幹</button>
+                <button class="bot-opt" onclick="botAnswer(3, 'おまかせ')">🎲 おまかせ</button>
+              </div>
+            </div>
+            <!-- Step 4 -->
+            <div class="bot-step" data-step="4">
+              <p class="bot-question">運動レベルは？</p>
+              <div class="bot-options">
+                <button class="bot-opt" onclick="botAnswer(4, '初心者')">🌱 初心者</button>
+                <button class="bot-opt" onclick="botAnswer(4, '中級者')">🌿 中級者</button>
+                <button class="bot-opt" onclick="botAnswer(4, '上級者')">🌳 上級者</button>
+              </div>
+            </div>
+          </div>
+          <!-- Result -->
+          <div class="bot-result" id="botResult" style="display:none;">
+            <div class="bot-result-header">
+              <h3 id="botResultTitle"></h3>
+              <p id="botResultDesc"></p>
+            </div>
+            <div class="bot-menu-list" id="botMenuList"></div>
+            <div class="bot-actions">
+              <button class="bot-restart" onclick="botReset()">もう一度やり直す</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Category chips (mobile) -->
       <div class="category-chips" id="categoryChips">
         <button class="chip active" data-category="all" onclick="filterCategory('all', this)">すべて</button>
