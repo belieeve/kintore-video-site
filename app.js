@@ -114,7 +114,7 @@ function createVideoCard(video) {
       <div class="thumbnail-wrap">
         <img src="${getThumbnail(video.videoId)}" alt="${title}" loading="lazy" class="loading"
              onload="this.classList.remove('loading')"
-             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22%3E%3Crect fill=%22%23303030%22 width=%22320%22 height=%22180%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23888%22 font-size=%2214%22%3E動画%3C/text%3E%3C/svg%3E'">
+             onerror="this.closest('.video-card').style.display='none'">
         ${duration ? `<span class="duration-badge">${duration}分</span>` : ''}
         <div class="play-overlay">
           <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="24" fill="rgba(0,0,0,0.6)"/><polygon points="18,14 36,24 18,34" fill="#fff"/></svg>
@@ -169,6 +169,8 @@ function renderHome() {
   grid.style.display = 'none';
   noResults.style.display = 'none';
   hero.style.display = 'block';
+  document.getElementById('backHomeBtn').style.display = 'none';
+  document.getElementById('menuBot').style.display = 'block';
 
   countEl.textContent = `${allVideos.length} 本`;
   heroCount.textContent = `全 ${allVideos.length} 本の動画`;
@@ -244,11 +246,13 @@ function renderVideos() {
     return;
   }
 
-  // Hide home, show grid
+  // Hide home, show grid and back button
   homeSections.style.display = 'none';
   hero.style.display = 'none';
   grid.style.display = '';
   grid.innerHTML = '';
+  document.getElementById('backHomeBtn').style.display = 'flex';
+  document.getElementById('menuBot').style.display = 'none';
 
   let filtered = allVideos.filter(v => {
     // Purpose filter

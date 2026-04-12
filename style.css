@@ -508,6 +508,33 @@ body {
   color: var(--text-secondary);
 }
 
+/* Back Home Button */
+.back-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  margin-bottom: 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.back-home-btn:hover {
+  background: var(--bg-hover);
+}
+
+@media (max-width: 768px) {
+  .back-home-btn {
+    font-size: 13px;
+    padding: 6px 16px;
+  }
+}
+
 /* Record Banner */
 .record-banner {
   display: flex;
