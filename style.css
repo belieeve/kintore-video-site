@@ -1105,8 +1105,24 @@ body.sidebar-collapsed .content {
     font-size: 13px;
   }
 
+  .header-left {
+    min-width: auto;
+    gap: 8px;
+  }
+
   .header-center {
-    margin: 0 8px;
+    margin: 0 4px;
+    min-width: 0;
+  }
+
+  .search-box input {
+    padding: 6px 10px;
+    font-size: 13px;
+    min-width: 0;
+  }
+
+  .search-btn {
+    padding: 0 10px;
   }
 
   .logo-text {
