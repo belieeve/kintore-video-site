@@ -143,6 +143,9 @@ const HOME_SECTIONS = [
   { category: 'ストレッチ', icon: '🧘', title: 'ストレッチ' },
   { category: 'ボクササイズ', icon: '🥊', title: 'ボクササイズ' },
   { category: 'ヨガ', icon: '🧘‍♀️', title: 'ヨガ' },
+  { category: 'ピラティス', icon: '🤸', title: 'ピラティス' },
+  { category: 'ダンス', icon: '💃', title: 'ダンス' },
+  { category: 'HIIT', icon: '🔥', title: 'HIIT' },
 ];
 
 // Render home page with category rows
@@ -177,15 +180,37 @@ function renderHome() {
     section.innerHTML = `
       <div class="section-header">
         <h2 class="section-title">${sec.icon} ${sec.title}（${videos.length}本）</h2>
-        <a class="section-more" data-category="${sec.category}">すべて見る →</a>
+        <div class="section-header-right">
+          <button class="scroll-nav scroll-nav-left hidden" aria-label="左へ">◀</button>
+          <button class="scroll-nav scroll-nav-right" aria-label="右へ">▶</button>
+          <a class="section-more" data-category="${sec.category}">すべて見る →</a>
+        </div>
       </div>
       <div class="section-scroll"></div>
     `;
 
     const scroll = section.querySelector('.section-scroll');
+    const btnLeft = section.querySelector('.scroll-nav-left');
+    const btnRight = section.querySelector('.scroll-nav-right');
+    const scrollAmount = 296 * 3;
+
+    btnLeft.addEventListener('click', () => scroll.scrollBy({ left: -scrollAmount, behavior: 'smooth' }));
+    btnRight.addEventListener('click', () => scroll.scrollBy({ left: scrollAmount, behavior: 'smooth' }));
+
+    scroll.addEventListener('scroll', () => {
+      btnLeft.classList.toggle('hidden', scroll.scrollLeft <= 10);
+      btnRight.classList.toggle('hidden', scroll.scrollLeft >= scroll.scrollWidth - scroll.clientWidth - 10);
+    });
+
+    enableDragScroll(scroll);
     shuffled.forEach(v => scroll.appendChild(createVideoCard(v)));
 
     section.querySelector('.section-more').addEventListener('click', () => {
+      const sidebarItem = document.querySelector(`.sidebar-item[data-category="${sec.category}"]`);
+      filterCategory(sec.category, sidebarItem);
+    });
+
+    section.querySelector('.section-title').addEventListener('click', () => {
       const sidebarItem = document.querySelector(`.sidebar-item[data-category="${sec.category}"]`);
       filterCategory(sec.category, sidebarItem);
     });
@@ -404,17 +429,28 @@ async function init() {
     allVideos.forEach(v => {
       v.normalizedCategories = normalizeCategories(v);
       v.buiParts = getBui(v);
-      // Build display title from categories
-      const cats = v.normalizedCategories;
-      const parts = [];
-      cats.forEach(c => {
-        let label = c.category;
-        if (c.subCategory && c.subCategory !== c.category) {
-          label += `（${c.subCategory}）`;
-        }
-        if (!parts.includes(label)) parts.push(label);
-      });
-      v.displayTitle = parts.join(' + ');
+      // Use YouTube title if available, otherwise build from categories
+      if (v.title) {
+        v.displayTitle = v.title;
+      } else {
+        const cats = v.normalizedCategories;
+        const parts = [];
+        cats.forEach(c => {
+          let label = c.category;
+          if (c.subCategory && c.subCategory !== c.category) {
+            label += `（${c.subCategory}）`;
+          }
+          if (!parts.includes(label)) parts.push(label);
+        });
+        v.displayTitle = parts.join(' + ');
+      }
+
+      // Merge autoBui into buiParts
+      if (v.autoBui) {
+        v.autoBui.forEach(b => {
+          if (!v.buiParts.includes(b)) v.buiParts.push(b);
+        });
+      }
     });
 
     // Shuffle for variety on load
@@ -456,6 +492,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderVideos();
   });
 
+  // Enable drag scroll on category chips
+  enableDragScroll(document.getElementById('categoryChips'));
+
   // Sidebar toggle
   const menuBtn = document.getElementById('menuBtn');
   const sidebar = document.getElementById('sidebar');
@@ -479,6 +518,49 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.classList.remove('active');
   });
 });
+
+// Enable mouse drag scrolling for horizontal scroll areas
+function enableDragScroll(el) {
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  el.addEventListener('mousedown', (e) => {
+    if (e.target.closest('a')) return;
+    isDown = true;
+    el.style.cursor = 'grabbing';
+    startX = e.pageX - el.offsetLeft;
+    scrollLeft = el.scrollLeft;
+    e.preventDefault();
+  });
+
+  el.addEventListener('mouseleave', () => {
+    isDown = false;
+    el.style.cursor = 'grab';
+  });
+
+  el.addEventListener('mouseup', () => {
+    isDown = false;
+    el.style.cursor = 'grab';
+  });
+
+  el.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startX) * 2;
+    el.scrollLeft = scrollLeft - walk;
+  });
+
+  // Mouse wheel horizontal scroll
+  el.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    }
+  }, { passive: false });
+
+  el.style.cursor = 'grab';
+}
 
 // Expose functions for inline onclick
 window.filterCategory = filterCategory;
