@@ -508,6 +508,45 @@ body {
   color: var(--text-secondary);
 }
 
+/* Record Banner */
+.record-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  text-decoration: none;
+  color: #fff;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.record-banner:hover {
+  transform: scale(1.01);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+}
+
+.record-icon {
+  font-size: 24px;
+}
+
+.record-text {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.record-arrow {
+  font-size: 20px;
+}
+
+@media (max-width: 768px) {
+  .record-text {
+    font-size: 13px;
+  }
+}
+
 /* Menu Bot */
 .menu-bot {
   background: var(--bg-secondary);
