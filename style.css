@@ -272,8 +272,10 @@ body {
   gap: 8px;
   padding: 8px 0 16px;
   overflow-x: auto;
+  overflow-y: hidden;
   white-space: nowrap;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
 }
 
 .chip {
@@ -586,10 +588,12 @@ body {
   display: flex;
   gap: 16px;
   overflow-x: auto;
+  overflow-y: hidden;
   padding-bottom: 8px;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
 }
 
 .section-scroll::-webkit-scrollbar {

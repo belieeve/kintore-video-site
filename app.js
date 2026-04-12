@@ -523,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Enable mouse drag scrolling for horizontal scroll areas
+// Enable mouse drag scrolling for horizontal scroll areas (PC only)
 function enableDragScroll(el) {
   let isDown = false;
   let startX;
@@ -555,7 +555,7 @@ function enableDragScroll(el) {
     el.scrollLeft = scrollLeft - walk;
   });
 
-  // Mouse wheel horizontal scroll
+  // Mouse wheel horizontal scroll (PC only)
   el.addEventListener('wheel', (e) => {
     if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
       e.preventDefault();
@@ -563,7 +563,10 @@ function enableDragScroll(el) {
     }
   }, { passive: false });
 
-  el.style.cursor = 'grab';
+  // Only show grab cursor on non-touch devices
+  if (!('ontouchstart' in window)) {
+    el.style.cursor = 'grab';
+  }
 }
 
 // Expose functions for inline onclick
