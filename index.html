@@ -71,6 +71,44 @@
       </div>
       <div class="sidebar-divider"></div>
       <div class="sidebar-section">
+        <h3 class="sidebar-title">目的別</h3>
+        <a href="#" class="sidebar-item" data-purpose="ダイエット" onclick="filterPurpose('ダイエット', this); return false;">
+          <span class="cat-icon">🔥</span><span>ダイエット</span>
+        </a>
+        <a href="#" class="sidebar-item" data-purpose="筋力アップ" onclick="filterPurpose('筋力アップ', this); return false;">
+          <span class="cat-icon">💪</span><span>筋力アップ</span>
+        </a>
+        <a href="#" class="sidebar-item" data-purpose="柔軟性" onclick="filterPurpose('柔軟性', this); return false;">
+          <span class="cat-icon">🤸</span><span>柔軟性</span>
+        </a>
+        <a href="#" class="sidebar-item" data-purpose="リラックス" onclick="filterPurpose('リラックス', this); return false;">
+          <span class="cat-icon">😌</span><span>リラックス</span>
+        </a>
+        <a href="#" class="sidebar-item" data-purpose="朝の運動" onclick="filterPurpose('朝の運動', this); return false;">
+          <span class="cat-icon">🌅</span><span>朝の運動</span>
+        </a>
+        <a href="#" class="sidebar-item" data-purpose="夕方の運動" onclick="filterPurpose('夕方の運動', this); return false;">
+          <span class="cat-icon">🌇</span><span>夕方の運動</span>
+        </a>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">時間別</h3>
+        <a href="#" class="sidebar-item" data-time="5" onclick="filterTime(0, 5, this); return false;">
+          <span class="cat-icon">⚡</span><span>5分以内</span>
+        </a>
+        <a href="#" class="sidebar-item" data-time="10" onclick="filterTime(5, 10, this); return false;">
+          <span class="cat-icon">⏱️</span><span>5〜10分</span>
+        </a>
+        <a href="#" class="sidebar-item" data-time="20" onclick="filterTime(10, 20, this); return false;">
+          <span class="cat-icon">💪</span><span>10〜20分</span>
+        </a>
+        <a href="#" class="sidebar-item" data-time="99" onclick="filterTime(20, 999, this); return false;">
+          <span class="cat-icon">🔥</span><span>20分以上</span>
+        </a>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section">
         <h3 class="sidebar-title">部位別</h3>
         <div id="buiList"></div>
       </div>

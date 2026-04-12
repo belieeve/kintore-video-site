@@ -1,7 +1,38 @@
 let allVideos = [];
 let currentCategory = 'all';
 let currentBui = '';
+let currentPurpose = '';
+let currentTimeMin = null;
+let currentTimeMax = null;
 let searchQuery = '';
+
+// Purpose mapping: which categories/subcategories belong to each purpose
+const PURPOSE_MAP = {
+  'ダイエット': {
+    categories: ['有酸素', 'ボクササイズ'],
+    subKeywords: ['hiit', '有酸素', 'ボクササイズ', 'マラソン']
+  },
+  '筋力アップ': {
+    categories: ['筋トレ'],
+    subKeywords: ['筋トレ', '腕立て', '全身', '上半身', '下半身', '胸', '背中', '腹筋', '足', '腕', 'お尻', 'お腹', '体幹']
+  },
+  '柔軟性': {
+    categories: ['ストレッチ', 'ヨガ', 'ピラティス'],
+    subKeywords: ['ストレッチ', 'ヨガ', 'ピラティス', '柔軟']
+  },
+  'リラックス': {
+    categories: ['ストレッチ', 'ヨガ'],
+    subKeywords: ['ストレッチ', 'ヨガ', 'リラクゼーション', 'リラックス']
+  },
+  '朝の運動': {
+    categories: ['ラジオ体操'],
+    subKeywords: ['ラジオ体操']
+  },
+  '夕方の運動': {
+    categories: ['夕方メニュー'],
+    subKeywords: ['夕方']
+  }
+};
 
 // YouTube thumbnail URL
 function getThumbnail(videoId) {
@@ -106,8 +137,21 @@ function renderVideos() {
   grid.innerHTML = '';
 
   let filtered = allVideos.filter(v => {
+    // Purpose filter
+    if (currentPurpose) {
+      const pm = PURPOSE_MAP[currentPurpose];
+      if (pm) {
+        const matchCat = v.normalizedCategories.some(c => pm.categories.includes(c.category));
+        const matchSub = v.normalizedCategories.some(c => {
+          const sub = (c.subCategory || '').toLowerCase();
+          return pm.subKeywords.some(kw => sub.includes(kw.toLowerCase()));
+        });
+        if (!matchCat && !matchSub) return false;
+      }
+    }
+
     // Category filter
-    if (currentCategory !== 'all') {
+    if (currentCategory !== 'all' && !currentPurpose) {
       const hasCat = v.normalizedCategories.some(c => c.category === currentCategory);
       if (!hasCat) return false;
     }
@@ -115,6 +159,13 @@ function renderVideos() {
     // Body part filter
     if (currentBui) {
       if (!v.buiParts.includes(currentBui)) return false;
+    }
+
+    // Time filter
+    if (currentTimeMin !== null && currentTimeMax !== null) {
+      const dur = v.duration;
+      if (!dur || typeof dur !== 'number') return false;
+      if (dur < currentTimeMin || dur > currentTimeMax) return false;
     }
 
     // Search
@@ -139,10 +190,49 @@ function renderVideos() {
   }
 }
 
+// Filter by time
+function filterTime(min, max, el) {
+  currentTimeMin = min;
+  currentTimeMax = max;
+  currentCategory = 'all';
+  currentBui = '';
+  currentPurpose = '';
+
+  document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+  document.querySelectorAll('.bui-item').forEach(item => item.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
+
+  renderVideos();
+  closeMobileSidebar();
+}
+
+// Filter by purpose
+function filterPurpose(purpose, el) {
+  currentPurpose = purpose;
+  currentCategory = 'all';
+  currentBui = '';
+  currentTimeMin = null;
+  currentTimeMax = null;
+
+  document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+  document.querySelectorAll('.bui-item').forEach(item => item.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
+
+  renderVideos();
+  closeMobileSidebar();
+}
+
 // Filter by category
 function filterCategory(category, el) {
   currentCategory = category;
   currentBui = '';
+  currentPurpose = '';
+  currentTimeMin = null;
+  currentTimeMax = null;
 
   // Update sidebar active state
   document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
@@ -187,6 +277,9 @@ function filterBui(bui, el) {
 function resetFilters() {
   currentCategory = 'all';
   currentBui = '';
+  currentPurpose = '';
+  currentTimeMin = null;
+  currentTimeMax = null;
   searchQuery = '';
   document.getElementById('searchInput').value = '';
   document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
@@ -312,4 +405,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // Expose functions for inline onclick
 window.filterCategory = filterCategory;
 window.filterBui = filterBui;
+window.filterPurpose = filterPurpose;
+window.filterTime = filterTime;
 window.resetFilters = resetFilters;
