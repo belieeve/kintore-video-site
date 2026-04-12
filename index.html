@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>oviceで筋トレチャット</title>
+  <link rel="icon" href="assets/ロゴ.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="menu-btn" id="menuBtn" aria-label="メニュー">
+        <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+      </button>
+      <a href="#" class="logo" onclick="resetFilters(); return false;">
+        <img src="assets/ロゴ.png" alt="ロゴ" class="logo-img">
+        <span class="logo-text">oviceで筋トレチャット</span>
+      </a>
+    </div>
+    <div class="header-center">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="動画を検索" autocomplete="off">
+        <button class="search-btn" id="searchBtn" aria-label="検索">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="video-count" id="videoCount"></span>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-section">
+        <a href="#" class="sidebar-item active" data-category="all" onclick="filterCategory('all', this); return false;">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span>ホーム</span>
+        </a>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">カテゴリ</h3>
+        <a href="#" class="sidebar-item" data-category="ラジオ体操" onclick="filterCategory('ラジオ体操', this); return false;">
+          <span class="cat-icon">🏃</span><span>ラジオ体操</span>
+        </a>
+        <a href="#" class="sidebar-item" data-category="筋トレ" onclick="filterCategory('筋トレ', this); return false;">
+          <span class="cat-icon">💪</span><span>筋トレ</span>
+        </a>
+        <a href="#" class="sidebar-item" data-category="有酸素" onclick="filterCategory('有酸素', this); return false;">
+          <span class="cat-icon">🫀</span><span>有酸素</span>
+        </a>
+        <a href="#" class="sidebar-item" data-category="ストレッチ" onclick="filterCategory('ストレッチ', this); return false;">
+          <span class="cat-icon">🧘</span><span>ストレッチ</span>
+        </a>
+        <a href="#" class="sidebar-item" data-category="ボクササイズ" onclick="filterCategory('ボクササイズ', this); return false;">
+          <span class="cat-icon">🥊</span><span>ボクササイズ</span>
+        </a>
+        <a href="#" class="sidebar-item" data-category="ヨガ" onclick="filterCategory('ヨガ', this); return false;">
+          <span class="cat-icon">🧘‍♀️</span><span>ヨガ</span>
+        </a>
+        <a href="#" class="sidebar-item" data-category="ピラティス" onclick="filterCategory('ピラティス', this); return false;">
+          <span class="cat-icon">🤸</span><span>ピラティス</span>
+        </a>
+        <a href="#" class="sidebar-item" data-category="夕方メニュー" onclick="filterCategory('夕方メニュー', this); return false;">
+          <span class="cat-icon">🌇</span><span>夕方メニュー</span>
+        </a>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">部位別</h3>
+        <div id="buiList"></div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section about-section">
+        <h3 class="sidebar-title">チャンネル概要</h3>
+        <p class="about-text">oviceで筋トレ動画共有再生しながらみんなで運動するチャットです💪</p>
+        <div class="schedule">
+          <h4>毎日開催</h4>
+          <p>5:00〜5:30 ovice4F パラソルエリア</p>
+          <h4>ほぼ毎日開催</h4>
+          <p>9:00〜9:30 ovice4F パラソルエリア</p>
+          <p>13:00〜13:30 ovice4F パラソルエリア</p>
+          <p>17:30〜18:00 ovice2F モルディブエリア</p>
+          <p>20:15〜21:00 ovice2F モルディブエリア</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content" id="content">
+      <!-- Category chips (mobile) -->
+      <div class="category-chips" id="categoryChips">
+        <button class="chip active" data-category="all" onclick="filterCategory('all', this)">すべて</button>
+        <button class="chip" data-category="ラジオ体操" onclick="filterCategory('ラジオ体操', this)">ラジオ体操</button>
+        <button class="chip" data-category="筋トレ" onclick="filterCategory('筋トレ', this)">筋トレ</button>
+        <button class="chip" data-category="有酸素" onclick="filterCategory('有酸素', this)">有酸素</button>
+        <button class="chip" data-category="ストレッチ" onclick="filterCategory('ストレッチ', this)">ストレッチ</button>
+        <button class="chip" data-category="ボクササイズ" onclick="filterCategory('ボクササイズ', this)">ボクササイズ</button>
+        <button class="chip" data-category="ヨガ" onclick="filterCategory('ヨガ', this)">ヨガ</button>
+        <button class="chip" data-category="ピラティス" onclick="filterCategory('ピラティス', this)">ピラティス</button>
+        <button class="chip" data-category="夕方メニュー" onclick="filterCategory('夕方メニュー', this)">夕方メニュー</button>
+      </div>
+
+      <div class="video-grid" id="videoGrid"></div>
+      <div class="no-results" id="noResults" style="display:none;">
+        <svg width="64" height="64" viewBox="0 0 24 24"><path fill="#606060" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <p>動画が見つかりませんでした</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
