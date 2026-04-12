@@ -1,3 +1,5 @@
 .DS_Store
 *.xlsx
+*.png.bak
 .vercel
+ovice*.png

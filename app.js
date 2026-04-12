@@ -90,6 +90,13 @@ function getBui(video) {
   return [...parts];
 }
 
+// Escape HTML to prevent XSS
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 // Create video card HTML
 function createVideoCard(video) {
   const card = document.createElement('div');
@@ -100,7 +107,7 @@ function createVideoCard(video) {
   const subCat = cats[0]?.subCategory || '';
   const duration = formatDuration(video.duration);
   const buiParts = video.buiParts;
-  const title = video.displayTitle || `${primaryCat}${subCat ? ' - ' + subCat : ''}`;
+  const title = escapeHtml(video.displayTitle || `${primaryCat}${subCat ? ' - ' + subCat : ''}`);
 
   card.innerHTML = `
     <a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank" rel="noopener">
@@ -118,9 +125,9 @@ function createVideoCard(video) {
         <div class="video-meta">
           <div class="video-title">${title}</div>
           <div>
-            ${cats.map(c => `<span class="video-category">${c.category}</span>`).join('')}
+            ${cats.map(c => `<span class="video-category">${escapeHtml(c.category)}</span>`).join('')}
           </div>
-          ${buiParts.length > 0 ? `<div class="video-sub">部位: ${buiParts.join(' / ')}</div>` : ''}
+          ${buiParts.length > 0 ? `<div class="video-sub">部位: ${buiParts.map(b => escapeHtml(b)).join(' / ')}</div>` : ''}
         </div>
       </div>
     </a>
@@ -278,7 +285,7 @@ function renderVideos() {
     // Search
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      const searchable = (v.displayTitle + ' ' +
+      const searchable = ((v.title || '') + ' ' + v.displayTitle + ' ' +
         v.normalizedCategories.map(c => c.category + ' ' + c.subCategory).join(' ') +
         ' ' + v.buiParts.join(' ')).toLowerCase();
       if (!searchable.includes(q)) return false;
@@ -396,6 +403,7 @@ function resetFilters() {
     chip.classList.toggle('active', chip.dataset.category === 'all');
   });
   renderVideos();
+  window.scrollTo(0, 0);
 }
 
 // Build body part list in sidebar
