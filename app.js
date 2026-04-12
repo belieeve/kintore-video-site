@@ -129,11 +129,89 @@ function createVideoCard(video) {
   return card;
 }
 
+// Check if we're on the home view (no filters active)
+function isHomeView() {
+  return currentCategory === 'all' && !currentBui && !currentPurpose
+    && currentTimeMin === null && !searchQuery;
+}
+
+// Category sections config for home page
+const HOME_SECTIONS = [
+  { category: 'ラジオ体操', icon: '🏃', title: 'ラジオ体操' },
+  { category: '筋トレ', icon: '💪', title: '筋トレ' },
+  { category: '有酸素', icon: '🫀', title: '有酸素' },
+  { category: 'ストレッチ', icon: '🧘', title: 'ストレッチ' },
+  { category: 'ボクササイズ', icon: '🥊', title: 'ボクササイズ' },
+  { category: 'ヨガ', icon: '🧘‍♀️', title: 'ヨガ' },
+];
+
+// Render home page with category rows
+function renderHome() {
+  const homeSections = document.getElementById('homeSections');
+  const grid = document.getElementById('videoGrid');
+  const noResults = document.getElementById('noResults');
+  const hero = document.getElementById('hero');
+  const countEl = document.getElementById('videoCount');
+  const heroCount = document.getElementById('heroCount');
+
+  homeSections.innerHTML = '';
+  homeSections.style.display = 'block';
+  grid.style.display = 'none';
+  noResults.style.display = 'none';
+  hero.style.display = 'block';
+
+  countEl.textContent = `${allVideos.length} 本`;
+  heroCount.textContent = `全 ${allVideos.length} 本の動画`;
+
+  HOME_SECTIONS.forEach(sec => {
+    const videos = allVideos.filter(v =>
+      v.normalizedCategories.some(c => c.category === sec.category)
+    );
+    if (videos.length === 0) return;
+
+    // Shuffle and pick up to 10
+    const shuffled = [...videos].sort(() => Math.random() - 0.5).slice(0, 10);
+
+    const section = document.createElement('div');
+    section.className = 'section-row';
+    section.innerHTML = `
+      <div class="section-header">
+        <h2 class="section-title">${sec.icon} ${sec.title}（${videos.length}本）</h2>
+        <a class="section-more" data-category="${sec.category}">すべて見る →</a>
+      </div>
+      <div class="section-scroll"></div>
+    `;
+
+    const scroll = section.querySelector('.section-scroll');
+    shuffled.forEach(v => scroll.appendChild(createVideoCard(v)));
+
+    section.querySelector('.section-more').addEventListener('click', () => {
+      const sidebarItem = document.querySelector(`.sidebar-item[data-category="${sec.category}"]`);
+      filterCategory(sec.category, sidebarItem);
+    });
+
+    homeSections.appendChild(section);
+  });
+}
+
 // Filter and render videos
 function renderVideos() {
   const grid = document.getElementById('videoGrid');
   const noResults = document.getElementById('noResults');
   const countEl = document.getElementById('videoCount');
+  const homeSections = document.getElementById('homeSections');
+  const hero = document.getElementById('hero');
+
+  // If home view, show sections instead of grid
+  if (isHomeView()) {
+    renderHome();
+    return;
+  }
+
+  // Hide home, show grid
+  homeSections.style.display = 'none';
+  hero.style.display = 'none';
+  grid.style.display = '';
   grid.innerHTML = '';
 
   let filtered = allVideos.filter(v => {
