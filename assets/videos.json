@@ -1301,7 +1301,6 @@
       "20260119",
       "20240222",
       "20260319",
-      "20250622",
       "20250713",
       "20240812",
       "20250902",
@@ -6555,7 +6554,8 @@
       }
     ],
     "dates": [
-      "20260424"
+      "20260424",
+      "20250622"
     ],
     "duration": 4.0,
     "title": "ラジオ体操第一「Radio Calisthenics」 | 童謡 | 日本語 | 劇団ぐんまちゃん♪"
@@ -8414,8 +8414,8 @@
     ]
   },
   {
-    "videoId": "pwwwNJn9ptI",
-    "url": "https://youtu.be/pwwwNJn9ptI",
+    "videoId": "FLSbc_qRELk",
+    "url": "https://youtu.be/FLSbc_qRELk",
     "categories": [
       {
         "category": "ストレッチ",
@@ -8426,7 +8426,10 @@
       "20250608"
     ],
     "duration": 6.0,
-    "title": ""
+    "title": "5分で全身ほぐれる☀️リラックスストレッチですっきり痩せ！",
+    "autoBui": [
+      "全身"
+    ]
   },
   {
     "videoId": "PQy0hcY-n9I",
@@ -8519,8 +8522,8 @@
     "title": "寝る前にやる「痩せるストレッチ」！楽なのにすごい痩せるダイエット【5分】"
   },
   {
-    "videoId": "md8fCccrt5s",
-    "url": "https://youtu.be/md8fCccrt5s",
+    "videoId": "iuhcPxBUjEU",
+    "url": "https://youtu.be/iuhcPxBUjEU",
     "categories": [
       {
         "category": "ラジオ体操",
@@ -8528,11 +8531,10 @@
       }
     ],
     "dates": [
-      "20250611",
-      "20250925"
+      "20250611"
     ],
     "duration": 4.0,
-    "title": ""
+    "title": "2025.6.22 北海道ご当地キャラフェスタ 2日目キャラさんによるラジオ体操第1"
   },
   {
     "videoId": "8lU1PGFE6l8",
@@ -13086,6 +13088,21 @@
     "autoBui": [
       "全身"
     ]
+  },
+  {
+    "videoId": "md8fCccrt5s",
+    "url": "https://youtu.be/md8fCccrt5s",
+    "categories": [
+      {
+        "category": "ラジオ体操",
+        "subCategory": ""
+      }
+    ],
+    "dates": [
+      "20250925"
+    ],
+    "duration": 4.0,
+    "title": ""
   },
   {
     "videoId": "fjToKBuvNRQ",
