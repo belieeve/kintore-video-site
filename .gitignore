@@ -3,3 +3,4 @@
 *.png.bak
 .vercel
 ovice*.png
+.env*.local
