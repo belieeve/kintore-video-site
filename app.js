@@ -172,6 +172,7 @@ function renderHome() {
   document.getElementById('backHomeBtn').style.display = 'none';
   document.getElementById('menuBot').style.display = 'block';
   document.getElementById('featuredVideo').style.display = 'block';
+  document.getElementById('agkMvSection').style.display = 'block';
 
   countEl.textContent = `${allVideos.length} 本`;
   heroCount.textContent = `全 ${allVideos.length} 本の動画`;
@@ -255,6 +256,7 @@ function renderVideos() {
   document.getElementById('backHomeBtn').style.display = 'flex';
   document.getElementById('menuBot').style.display = 'none';
   document.getElementById('featuredVideo').style.display = 'none';
+  document.getElementById('agkMvSection').style.display = 'none';
 
   let filtered = allVideos.filter(v => {
     // Purpose filter

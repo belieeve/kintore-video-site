@@ -574,6 +574,146 @@ body {
   }
 }
 
+/* AGK Music Videos */
+.agk-mv-section {
+  background:
+    radial-gradient(circle at 88% 0%, rgba(255, 91, 154, 0.16), transparent 36%),
+    linear-gradient(145deg, #15182a 0%, #10131f 100%);
+  border: 1px solid rgba(117, 179, 255, 0.22);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24);
+}
+
+.agk-mv-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.agk-mv-eyebrow {
+  color: #77e8ff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin-bottom: 5px;
+}
+
+.agk-mv-heading h2 {
+  font-size: 21px;
+  line-height: 1.35;
+}
+
+.agk-mv-heading-badge {
+  flex-shrink: 0;
+  color: #ffd86b;
+  background: rgba(255, 216, 107, 0.1);
+  border: 1px solid rgba(255, 216, 107, 0.26);
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.agk-mv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.agk-mv-card {
+  overflow: hidden;
+  background: rgba(10, 12, 20, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 13px;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.agk-mv-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(119, 232, 255, 0.42);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3);
+}
+
+.agk-mv-card video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #05060a;
+}
+
+.agk-mv-card-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 14px 15px;
+}
+
+.agk-mv-card-body h3 {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.agk-mv-label {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.agk-mv-label-normal {
+  color: #171008;
+  background: #ffd86b;
+}
+
+.agk-mv-label-feat {
+  color: #061217;
+  background: #77e8ff;
+}
+
+.agk-mv-duration {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 768px) {
+  .agk-mv-section {
+    padding: 14px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+  }
+
+  .agk-mv-heading {
+    align-items: center;
+  }
+
+  .agk-mv-heading h2 {
+    font-size: 16px;
+  }
+
+  .agk-mv-eyebrow {
+    font-size: 9px;
+  }
+
+  .agk-mv-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .agk-mv-card-body h3 {
+    font-size: 13px;
+  }
+}
+
 /* Featured Video */
 .featured-video {
   background: var(--bg-secondary);
