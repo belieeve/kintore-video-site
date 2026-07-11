@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
 """Google スプレッドシートから動画データを取得してvideos.jsonを生成
+スプレッドシートをxlsx形式でダウンロードし、ハイパーリンクの実URL（クリック先）を読み取る。
 YouTube動画タイトルを取得し、内容に基づいてカテゴリを自動分類"""
 
 import json
 import os
 import re
+import sys
 import time
+import tempfile
 import urllib.request
-import urllib.parse
+
+import openpyxl
 
 SHEET_ID = '1QF2Cmuds6ao6Y-JTEIdTJIZBWhvRo3Sa_TJ_Amu7GTs'
 OUTPUT = 'assets/videos.json'
-SHEET_NAMES = [
-    '1月メニュー', '2月メニュー', '3月メニュー', '4月メニュー',
-    '5月メニュー', '6月メニュー', '7月メニュー', '8月メニュー',
-    '9月メニュー', '10月メニュー', '11月メニュー', '12月メニュー',
-]
+EXPORT_URL = f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=xlsx'
+
+MENU_SHEET_RE = re.compile(r'^\d+月メニュー$')
 
 # タイトルからカテゴリを自動判定するルール（優先度順）
 AUTO_CATEGORY_RULES = [
@@ -51,7 +53,7 @@ def extract_video_id(url):
     if not url:
         return None
     m = re.search(
-        r'(?:youtu\.be/|youtube\.com/watch\?v=|youtube\.com/embed/)([a-zA-Z0-9_-]{11})',
+        r'(?:youtu\.be/|youtube\.com/watch\?v=|youtube\.com/embed/|youtube\.com/shorts/)([a-zA-Z0-9_-]{11})',
         url,
     )
     return m.group(1) if m else None
@@ -94,29 +96,35 @@ def auto_categorize(title):
     return categories, bui_parts
 
 
-def fetch_sheet(sheet_name):
-    """gviz API でシートデータを取得"""
-    encoded = urllib.parse.quote(sheet_name)
-    url = (
-        f'https://docs.google.com/spreadsheets/d/{SHEET_ID}'
-        f'/gviz/tq?tqx=out:json&sheet={encoded}'
-    )
-    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-    with urllib.request.urlopen(req) as res:
-        raw = res.read().decode('utf-8')
-    json_str = raw.split('(', 1)[1].rsplit(')', 1)[0]
-    data = json.loads(json_str)
-    rows = []
-    for row in data['table']['rows']:
-        cells = row.get('c', [])
-        vals = []
-        for c in cells:
-            if c is None:
-                vals.append(None)
-            else:
-                vals.append(c.get('v'))
-        rows.append(vals)
-    return rows
+def download_xlsx():
+    """スプレッドシートをxlsx形式でダウンロード（ハイパーリンクの実URLを保持）"""
+    req = urllib.request.Request(EXPORT_URL, headers={'User-Agent': 'Mozilla/5.0'})
+    with urllib.request.urlopen(req, timeout=120) as res:
+        data = res.read()
+    path = os.path.join(tempfile.gettempdir(), 'kintore_sheet_export.xlsx')
+    with open(path, 'wb') as f:
+        f.write(data)
+    return path
+
+
+def get_url(cell):
+    """セルからYouTube URLを取得。表示テキストが古い場合があるため、
+    クリック先（ハイパーリンク）を優先する"""
+    if cell.hyperlink and cell.hyperlink.target and 'youtu' in str(cell.hyperlink.target):
+        return cell.hyperlink.target
+    if isinstance(cell.value, str) and 'youtu' in cell.value:
+        return cell.value
+    return None
+
+
+def fmt_date(v):
+    if v is None:
+        return ''
+    if hasattr(v, 'strftime'):
+        return v.strftime('%Y%m%d')
+    if isinstance(v, (int, float)):
+        return str(int(v))
+    return str(v)
 
 
 def add_video(videos, url, category, sub_category='', date='', duration=None):
@@ -142,56 +150,141 @@ def add_video(videos, url, category, sub_category='', date='', duration=None):
         videos[vid]['duration'] = duration
 
 
-def main():
-    videos = {}
+def find_header_row(ws, max_scan=30):
+    """ヘッダー行を探す（A列が「日付」、または行内に「◯◯動画URL」ラベルがある行）"""
+    for row in ws.iter_rows(min_row=1, max_row=max_scan, max_col=14):
+        a = row[0].value
+        if isinstance(a, str) and a.strip() == '日付':
+            return row[0].row
+        for cell in row:
+            if isinstance(cell.value, str) and '動画URL' in cell.value:
+                return cell.row
+    return None
 
-    for sheet_name in SHEET_NAMES:
-        print(f'読み込み中: {sheet_name}')
-        try:
-            rows = fetch_sheet(sheet_name)
-        except Exception as e:
-            print(f'  スキップ ({e})')
+
+def parse_menu_sheet(videos, ws):
+    """◯月メニュー: 日付/部位 + D:ラジオ体操 F:筋トレ H:有酸素① J:有酸素② L,N:ストレッチ"""
+    header = find_header_row(ws)
+    start = header + 1 if header else 1
+    for row in ws.iter_rows(min_row=start):
+        vals = [c.value for c in row]
+        if not vals:
             continue
+        date_str = fmt_date(vals[0])
+        bui = str(vals[1]) if len(vals) > 1 and vals[1] else ''
 
-        # ヘッダー行をスキップ（1行目）
-        for row in rows[1:]:
-            if len(row) < 6:
-                continue
-            date_val = row[0]
-            if date_val is None:
-                continue
-            date_str = str(int(date_val)) if isinstance(date_val, (int, float)) else str(date_val)
-            bui = str(row[1]) if len(row) > 1 and row[1] else ''
+        # 列: D(3)ラジオ体操, E(4)時間, F(5)筋トレ, G(6)時間, H(7)有酸素①, I(8)時間,
+        #     J(9)有酸素②, K(10)時間, L(11)ストレッチ, M(12)時間, N(13)ストレッチ, O(14)時間
+        col_map = [
+            (3, 4, 'ラジオ体操', ''),
+            (5, 6, '筋トレ', bui),
+            (7, 8, '有酸素', ''),
+            (9, 10, '有酸素', ''),
+            (11, 12, 'ストレッチ', ''),
+            (13, 14, 'ストレッチ', ''),
+        ]
+        for col_idx, dur_idx, cat, sub in col_map:
+            if col_idx < len(row):
+                url = get_url(row[col_idx])
+                dur = vals[dur_idx] if dur_idx and dur_idx < len(vals) else None
+                if url:
+                    add_video(videos, url, cat, sub, date_str, dur)
 
-            # 列マッピング: D(3)ラジオ体操, E(4)時間, F(5)筋トレ, G(6)時間,
-            # H(7)有酸素①, I(8)時間, J(9)有酸素②, K(10)時間,
-            # L(11)ストレッチ, M(12)時間, N(13)ストレッチ
-            col_map = [
-                (3, 4, 'ラジオ体操', ''),
-                (5, 6, '筋トレ', bui),
-                (7, 8, '有酸素', ''),
-                (9, 10, '有酸素', ''),
-                (11, 12, 'ストレッチ', ''),
-                (13, None, 'ストレッチ', ''),
-            ]
-            for col_idx, dur_idx, cat, sub in col_map:
-                if col_idx < len(row):
-                    url = row[col_idx]
-                    dur = row[dur_idx] if dur_idx and dur_idx < len(row) else None
-                    if url and isinstance(url, str) and 'youtu' in url:
-                        add_video(videos, url, cat, sub, date_str, dur)
+
+def parse_202312_sheet(videos, ws):
+    """202312メニュー: F(5)ラジオ体操(E時間), G(6)メイン動画(Hジャンル, I時間),
+    J(9)有酸素(K時間), L(11),M(12)ストレッチ"""
+    header = find_header_row(ws)
+    start = header + 1 if header else 2
+    for row in ws.iter_rows(min_row=start):
+        vals = [c.value for c in row]
+        if not vals:
+            continue
+        date_str = fmt_date(vals[0])
+        genre = str(vals[7]) if len(vals) > 7 and vals[7] else ''
+
+        col_map = [
+            (5, 4, 'ラジオ体操', ''),
+            (6, 8, '筋トレ', genre),
+            (9, 10, '有酸素', ''),
+            (11, None, 'ストレッチ', ''),
+            (12, None, 'ストレッチ', ''),
+        ]
+        for col_idx, dur_idx, cat, sub in col_map:
+            if col_idx < len(row):
+                url = get_url(row[col_idx])
+                dur = vals[dur_idx] if dur_idx is not None and dur_idx < len(vals) else None
+                if url:
+                    add_video(videos, url, cat, sub, date_str, dur)
+
+
+def parse_yugata_sheet(videos, ws):
+    """夕方メニュー: B(1)ジャンル, D(3)動画URL, E(4)時間（日付なし）"""
+    header = find_header_row(ws)
+    start = header + 1 if header else 1
+    for row in ws.iter_rows(min_row=start):
+        vals = [c.value for c in row]
+        if len(row) <= 3:
+            continue
+        genre = str(vals[1]) if len(vals) > 1 and vals[1] else ''
+        url = get_url(row[3])
+        dur = vals[4] if len(vals) > 4 else None
+        if url:
+            add_video(videos, url, '夕方メニュー', genre, '', dur)
+
+
+def parse_radio_sheet(videos, ws):
+    """ラジオ体操: A列に動画URLの一覧"""
+    for row in ws.iter_rows(min_col=1, max_col=1):
+        url = get_url(row[0])
+        if url:
+            add_video(videos, url, 'ラジオ体操', '')
+
+
+def main():
+    print('スプレッドシートをダウンロード中...')
+    xlsx_path = download_xlsx()
+    wb = openpyxl.load_workbook(xlsx_path, data_only=True)
+
+    videos = {}
+    for ws in wb.worksheets:
+        name = ws.title
+        if MENU_SHEET_RE.match(name):
+            print(f'読み込み中: {name}')
+            parse_menu_sheet(videos, ws)
+        elif name == '202312メニュー':
+            print(f'読み込み中: {name}')
+            parse_202312_sheet(videos, ws)
+        elif name == '夕方メニュー':
+            print(f'読み込み中: {name}')
+            parse_yugata_sheet(videos, ws)
+        elif name == 'ラジオ体操':
+            print(f'読み込み中: {name}')
+            parse_radio_sheet(videos, ws)
 
     video_list = list(videos.values())
     print(f'\n合計動画数: {len(video_list)}')
 
     # 既存データからタイトルキャッシュを読み込み
     title_cache = {}
+    old_count = 0
     if os.path.exists(OUTPUT):
         with open(OUTPUT, 'r', encoding='utf-8') as f:
             old_data = json.loads(f.read())
+            old_count = len(old_data)
             for v in old_data:
                 if v.get('title'):
                     title_cache[v['videoId']] = v['title']
+
+    # 安全ガード: シート名変更や列構成変更でパース結果が激減した場合は
+    # 空・欠損データで上書きせずに失敗させる（本番から動画が全消えするのを防ぐ）
+    if not video_list:
+        print('エラー: 動画が1本も取得できませんでした。videos.jsonは更新しません。')
+        sys.exit(1)
+    if old_count and len(video_list) < old_count * 0.8:
+        print(f'エラー: 動画数が既存の8割未満に激減 ({old_count}→{len(video_list)})。'
+              'シート構成が変わった可能性があるため videos.json は更新しません。')
+        sys.exit(1)
 
     # YouTube動画タイトルを取得（未取得のもののみ）
     new_count = 0

@@ -18,6 +18,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install dependencies
+        run: pip install openpyxl
+
       - name: Sync spreadsheet
         run: python sync_cloud.py
 
