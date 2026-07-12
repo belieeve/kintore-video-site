@@ -753,6 +753,35 @@ function generateMenu() {
     `${bui}・${level}向け・合計約${Math.round(totalTime)}分`;
 }
 
+// ===== アクセス解析（GA4）=====
+// 動画クリック・記録表バナークリックをGoogleアナリティクスに送信する
+document.addEventListener('click', (e) => {
+  if (typeof gtag !== 'function') return;
+
+  const videoLink = e.target.closest('a[href*="youtube.com/watch"]');
+  if (videoLink) {
+    const card = e.target.closest('.video-card');
+    const botItem = e.target.closest('.bot-menu-item');
+    const title =
+      card?.querySelector('.video-title')?.textContent ||
+      botItem?.querySelector('.bot-menu-title')?.textContent ||
+      videoLink.href;
+    const category =
+      card?.querySelector('.video-category')?.textContent ||
+      botItem?.querySelector('.bot-menu-cat')?.textContent || '';
+    gtag('event', 'video_click', {
+      video_title: title,
+      video_category: category,
+      click_source: botItem ? 'menu_bot' : 'video_card',
+    });
+    return;
+  }
+
+  if (e.target.closest('a.record-banner')) {
+    gtag('event', 'record_banner_click');
+  }
+});
+
 // Expose functions for inline onclick
 window.filterCategory = filterCategory;
 window.filterBui = filterBui;

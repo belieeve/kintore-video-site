@@ -4,3 +4,4 @@
 .vercel
 ovice*.png
 .env*.local
+.claude/
