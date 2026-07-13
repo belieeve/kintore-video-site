@@ -620,8 +620,14 @@ body {
 
 .agk-mv-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+}
+
+@media (max-width: 1100px) and (min-width: 769px) {
+  .agk-mv-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .agk-mv-card {
